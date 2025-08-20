@@ -40,7 +40,7 @@ echo "⚙️ Setting up environment..."
 cat > .env << EOF
 NODE_ENV=production
 DATABASE_URL=postgresql://neondb_owner:npg_cpOQrmBD48kM@ep-proud-salad-a149njzg-pooler.ap-southeast-1.aws.neon.tech/neondb
-NEXT_PUBLIC_API_URL=http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4):5000
+NEXT_PUBLIC_API_URL=http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4):5001
 EOF
 
 # Set up database schema
@@ -74,7 +74,7 @@ server {
     }
 
     location /api {
-        proxy_pass http://localhost:5000;
+        proxy_pass http://localhost:5001;
         proxy_http_version 1.1;
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection 'upgrade';

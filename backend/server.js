@@ -1,15 +1,15 @@
-const express = require("express")
-const { Pool } = require("pg")
-const cors = require("cors")
-const { v4: uuidv4 } = require("uuid")
-require("dotenv").config()
+const express = require("express");
+const { Pool } = require("pg");
+const cors = require("cors");
+const { v4: uuidv4 } = require("uuid");
+require("dotenv").config();
 
-const app = express()
-const PORT = process.env.PORT || 5000
+const app = express();
+const PORT = process.env.PORT || 5001;
 
 // Middleware
-app.use(cors())
-app.use(express.json())
+app.use(cors());
+app.use(express.json());
 
 // Database connection
 const pool = new Pool({
@@ -19,28 +19,35 @@ const pool = new Pool({
   ssl: {
     rejectUnauthorized: false,
   },
-})
+});
 
 // Test database connection
 pool.connect((err, client, release) => {
   if (err) {
-    console.error("Error connecting to database:", err)
+    console.error("Error connecting to database:", err);
   } else {
-    console.log("Connected to PostgreSQL database")
-    release()
+    console.log("Connected to PostgreSQL database");
+    release();
   }
-})
+});
 
 // Marriage age prediction algorithm
 function predictMarriageAge(userData) {
-  const { date_of_birth, current_job, body_count, is_perfume_used, has_iphone, has_bike } = userData
+  const {
+    date_of_birth,
+    current_job,
+    body_count,
+    is_perfume_used,
+    has_iphone,
+    has_bike,
+  } = userData;
 
   // Calculate current age
-  const birthDate = new Date(date_of_birth)
-  const currentAge = new Date().getFullYear() - birthDate.getFullYear()
+  const birthDate = new Date(date_of_birth);
+  const currentAge = new Date().getFullYear() - birthDate.getFullYear();
 
   // Base prediction starts with current age + random factor
-  let predictedAge = currentAge + Math.floor(Math.random() * 8) + 2
+  let predictedAge = currentAge + Math.floor(Math.random() * 8) + 2;
 
   // Job factor
   const jobFactors = {
@@ -51,33 +58,33 @@ function predictMarriageAge(userData) {
     entrepreneur: -1,
     student: 3,
     unemployed: 4,
-  }
+  };
 
-  const jobKey = current_job.toLowerCase()
-  predictedAge += jobFactors[jobKey] || 0
+  const jobKey = current_job.toLowerCase();
+  predictedAge += jobFactors[jobKey] || 0;
 
   // Body count factor (higher count = later marriage)
-  if (body_count > 5) predictedAge += 3
-  else if (body_count > 2) predictedAge += 1
-  else if (body_count === 0) predictedAge -= 1
+  if (body_count > 5) predictedAge += 3;
+  else if (body_count > 2) predictedAge += 1;
+  else if (body_count === 0) predictedAge -= 1;
 
   // Lifestyle factors
-  if (is_perfume_used) predictedAge -= 1 // Takes care of appearance
-  if (has_iphone) predictedAge -= 1 // Financially stable
-  if (has_bike) predictedAge += 1 // Still young at heart
+  if (is_perfume_used) predictedAge -= 1; // Takes care of appearance
+  if (has_iphone) predictedAge -= 1; // Financially stable
+  if (has_bike) predictedAge += 1; // Still young at heart
 
   // Ensure reasonable age range (18-45)
-  predictedAge = Math.max(18, Math.min(45, predictedAge))
+  predictedAge = Math.max(18, Math.min(45, predictedAge));
 
-  return predictedAge
+  return predictedAge;
 }
 
 // Routes
 
 // Health check
 app.get("/health", (req, res) => {
-  res.json({ status: "OK", message: "Marriage Predictor API is running" })
-})
+  res.json({ status: "OK", message: "Marriage Predictor API is running" });
+});
 
 // Get all predictions
 app.get("/api/predictions", async (req, res) => {
@@ -93,27 +100,35 @@ app.get("/api/predictions", async (req, res) => {
       FROM predictions 
       ORDER BY created_at DESC 
       LIMIT 50
-    `
+    `;
 
-    const result = await pool.query(query)
+    const result = await pool.query(query);
     res.json({
       success: true,
       data: result.rows,
-    })
+    });
   } catch (error) {
-    console.error("Error fetching predictions:", error)
+    console.error("Error fetching predictions:", error);
     res.status(500).json({
       success: false,
       message: "Failed to fetch predictions",
-    })
+    });
   }
-})
+});
 
 // Create new prediction
 app.post("/api/predict", async (req, res) => {
   try {
-    const { name, date_of_birth, place_of_birth, current_job, body_count, is_perfume_used, has_iphone, has_bike } =
-      req.body
+    const {
+      name,
+      date_of_birth,
+      place_of_birth,
+      current_job,
+      body_count,
+      is_perfume_used,
+      has_iphone,
+      has_bike,
+    } = req.body;
 
     // Validate required fields
     if (
@@ -129,19 +144,22 @@ app.post("/api/predict", async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "All fields are required",
-      })
+      });
     }
 
     // Generate UUID based on name (same name gets same UUID)
-    const userUuid = uuidv4()
+    const userUuid = uuidv4();
 
     // Predict marriage age
-    const predictedAge = predictMarriageAge(req.body)
+    const predictedAge = predictMarriageAge(req.body);
 
     // Check if user already exists
-    const existingUser = await pool.query("SELECT * FROM predictions WHERE name = $1", [name])
+    const existingUser = await pool.query(
+      "SELECT * FROM predictions WHERE name = $1",
+      [name]
+    );
 
-    let result
+    let result;
     if (existingUser.rows.length > 0) {
       // Update existing prediction
       result = await pool.query(
@@ -170,8 +188,8 @@ app.post("/api/predict", async (req, res) => {
           has_iphone,
           has_bike,
           predictedAge,
-        ],
-      )
+        ]
+      );
     } else {
       // Insert new prediction
       result = await pool.query(
@@ -193,8 +211,8 @@ app.post("/api/predict", async (req, res) => {
           has_iphone,
           has_bike,
           predictedAge,
-        ],
-      )
+        ]
+      );
     }
 
     res.json({
@@ -203,17 +221,17 @@ app.post("/api/predict", async (req, res) => {
         predicted_age: predictedAge,
         user_data: result.rows[0],
       },
-    })
+    });
   } catch (error) {
-    console.error("Error creating prediction:", error)
+    console.error("Error creating prediction:", error);
     res.status(500).json({
       success: false,
       message: "Failed to create prediction",
-    })
+    });
   }
-})
+});
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
-})
+  console.log(`Server running on port ${PORT}`);
+});

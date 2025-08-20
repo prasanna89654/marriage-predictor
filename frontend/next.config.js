@@ -5,7 +5,8 @@ const nextConfig = {
     outputFileTracingRoot: undefined,
   },
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+    NEXT_PUBLIC_API_URL:
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001",
   },
   eslint: {
     ignoreDuringBuilds: true,
@@ -16,6 +17,6 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

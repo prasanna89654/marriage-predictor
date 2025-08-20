@@ -34,7 +34,7 @@ docker-compose ps
 
 # Check application health
 echo "🏥 Checking application health..."
-curl -f http://localhost:5000/health && echo "✅ Backend is healthy"
+curl -f http://localhost:5001/health && echo "✅ Backend is healthy"
 curl -f http://localhost:3000 && echo "✅ Frontend is accessible"
 
 echo "✅ Deployment complete!"

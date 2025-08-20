@@ -14,11 +14,11 @@ A fun, AI-powered web application that predicts your marriage age based on perso
 ## 🏗️ Architecture
 
 \`\`\`
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Frontend      │    │    Backend      │    │   Database      │
-│   (Next.js)     │◄──►│   (Node.js)     │◄──►│ (PostgreSQL)    │
-│   Port: 3000    │    │   Port: 5000    │    │   (Neon)        │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
+│ Frontend │ │ Backend │ │ Database │
+│ (Next.js) │◄──►│ (Node.js) │◄──►│ (PostgreSQL) │
+│ Port: 3000 │ │ Port: 5001 │ │ (Neon) │
+└─────────────────┘ └─────────────────┘ └─────────────────┘
 \`\`\`
 
 ## 🚀 Quick Start
@@ -41,13 +41,17 @@ cd marriage-predictor
 #### Option A: Using Docker (Recommended)
 
 \`\`\`bash
+
 # Start both frontend and backend
+
 docker-compose up -d
 
 # View logs
+
 docker-compose logs -f
 
 # Stop services
+
 docker-compose down
 \`\`\`
 
@@ -70,8 +74,8 @@ npm run dev
 ### 3. Access the Application
 
 - **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:5000
-- **Health Check**: http://localhost:5000/health
+- **Backend API**: http://localhost:5001
+- **Health Check**: http://localhost:5001/health
 
 ## 🌐 Deployment to AWS EC2
 
@@ -86,26 +90,31 @@ npm run dev
    - SSH (22) - Your IP
    - HTTP (80) - Anywhere
    - Custom TCP (3000) - Anywhere
-   - Custom TCP (5000) - Anywhere
+   - Custom TCP (5001) - Anywhere
 7. Launch instance
 
 ### Step 2: Connect to EC2
 
 \`\`\`bash
+
 # Replace with your key file and EC2 public IP
+
 ssh -i your-key.pem ubuntu@YOUR_EC2_PUBLIC_IP
 \`\`\`
 
 ### Step 3: Setup EC2 (One-time)
 
 \`\`\`bash
+
 # Download and run setup script
+
 curl -o setup.sh https://raw.githubusercontent.com/YOUR_USERNAME/marriage-predictor/main/scripts/setup-ec2.sh
 chmod +x setup.sh
 ./setup.sh
 \`\`\`
 
 This script will:
+
 - Install Docker and Docker Compose
 - Install Nginx as reverse proxy
 - Clone your repository
@@ -158,27 +167,39 @@ cd /home/ubuntu/marriage-predictor
 ## 🛠️ Management Commands
 
 ### View Logs
+
 \`\`\`bash
+
 # On EC2
+
 cd /home/ubuntu/marriage-predictor
 ./scripts/logs.sh
 \`\`\`
 
 ### Backup Data
+
 \`\`\`bash
+
 # On EC2
+
 ./scripts/backup.sh
 \`\`\`
 
 ### Update Application
+
 \`\`\`bash
+
 # On EC2
+
 ./scripts/deploy.sh
 \`\`\`
 
 ### Restart Services
+
 \`\`\`bash
+
 # On EC2
+
 docker-compose restart
 \`\`\`
 
@@ -189,13 +210,13 @@ docker-compose restart
 **Backend (.env):**
 \`\`\`env
 DATABASE_URL=your_postgresql_connection_string
-PORT=5000
+PORT=5001
 NODE_ENV=production
 \`\`\`
 
 **Frontend (.env.local):**
 \`\`\`env
-NEXT_PUBLIC_API_URL=http://your-ec2-ip:5000
+NEXT_PUBLIC_API_URL=http://your-ec2-ip:5001
 \`\`\`
 
 ### Database Schema
@@ -204,18 +225,18 @@ The application uses PostgreSQL with the following main table:
 
 \`\`\`sql
 CREATE TABLE predictions (
-    id SERIAL PRIMARY KEY,
-    user_uuid UUID UNIQUE NOT NULL,
-    name VARCHAR(255) NOT NULL,
-    date_of_birth DATE NOT NULL,
-    place_of_birth VARCHAR(255) NOT NULL,
-    current_job VARCHAR(255) NOT NULL,
-    body_count INTEGER NOT NULL,
-    is_perfume_used BOOLEAN NOT NULL,
-    has_iphone BOOLEAN NOT NULL,
-    has_bike BOOLEAN NOT NULL,
-    predicted_age INTEGER NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+id SERIAL PRIMARY KEY,
+user_uuid UUID UNIQUE NOT NULL,
+name VARCHAR(255) NOT NULL,
+date_of_birth DATE NOT NULL,
+place_of_birth VARCHAR(255) NOT NULL,
+current_job VARCHAR(255) NOT NULL,
+body_count INTEGER NOT NULL,
+is_perfume_used BOOLEAN NOT NULL,
+has_iphone BOOLEAN NOT NULL,
+has_bike BOOLEAN NOT NULL,
+predicted_age INTEGER NOT NULL,
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 \`\`\`
 
@@ -225,24 +246,30 @@ CREATE TABLE predictions (
 
 **1. Application not accessible**
 \`\`\`bash
+
 # Check if containers are running
+
 docker-compose ps
 
 # Check logs
+
 docker-compose logs
 \`\`\`
 
 **2. Database connection issues**
+
 - Verify DATABASE_URL in environment variables
 - Check if Neon database is accessible
 - Ensure database schema is created
 
 **3. Frontend can't connect to backend**
+
 - Verify NEXT_PUBLIC_API_URL is correct
-- Check if backend is running on port 5000
+- Check if backend is running on port 5001
 - Ensure security groups allow traffic
 
 **4. Deployment fails**
+
 - Check GitHub Actions logs
 - Verify EC2 SSH connection
 - Ensure Docker is running on EC2
@@ -250,16 +277,21 @@ docker-compose logs
 ### Health Checks
 
 \`\`\`bash
+
 # Check backend health
-curl http://localhost:5000/health
+
+curl http://localhost:5001/health
 
 # Check if frontend is serving
+
 curl http://localhost:3000
 
 # Check Docker containers
+
 docker-compose ps
 
 # Check system resources
+
 docker stats
 \`\`\`
 

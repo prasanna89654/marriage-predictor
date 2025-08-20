@@ -1,17 +1,26 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { Heart, User, MapPin, Briefcase, Smartphone, Bike, Sparkles, ArrowLeft } from "lucide-react"
-import Link from "next/link"
-import axios from "axios"
-import { useRouter } from "next/navigation"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  Heart,
+  User,
+  MapPin,
+  Briefcase,
+  Smartphone,
+  Bike,
+  Sparkles,
+  ArrowLeft,
+} from "lucide-react";
+import Link from "next/link";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 export default function PredictPage() {
-  const router = useRouter()
-  const [loading, setLoading] = useState(false)
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     date_of_birth: "",
@@ -21,41 +30,45 @@ export default function PredictPage() {
     is_perfume_used: false,
     has_iphone: false,
     has_bike: false,
-  })
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
+    e.preventDefault();
+    setLoading(true);
 
     try {
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/predict`,
-        formData,
-      )
+        `${
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"
+        }/api/predict`,
+        formData
+      );
 
       // Store result and redirect
-      localStorage.setItem("predictionResult", JSON.stringify(response.data))
-      router.push("/result")
+      localStorage.setItem("predictionResult", JSON.stringify(response.data));
+      router.push("/result");
     } catch (error) {
-      console.error("Error making prediction:", error)
-      alert("Error making prediction. Please try again.")
+      console.error("Error making prediction:", error);
+      alert("Error making prediction. Please try again.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value, type } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]:
         type === "checkbox"
           ? (e.target as HTMLInputElement).checked
           : name === "body_count"
-            ? Number.parseInt(value) || 0
-            : value,
-    }))
-  }
+          ? Number.parseInt(value) || 0
+          : value,
+    }));
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-card to-background py-8 px-4">
@@ -190,7 +203,9 @@ export default function PredictPage() {
 
             {/* Lifestyle Questions */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-card-foreground font-montserrat">Lifestyle Questions</h3>
+              <h3 className="text-lg font-semibold text-card-foreground font-montserrat">
+                Lifestyle Questions
+              </h3>
 
               <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
                 <label className="flex items-center gap-2 text-sm font-medium text-card-foreground font-open-sans">
@@ -259,5 +274,5 @@ export default function PredictPage() {
         </motion.form>
       </div>
     </div>
-  )
+  );
 }
